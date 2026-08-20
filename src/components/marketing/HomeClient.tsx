@@ -63,60 +63,59 @@ export default function HomeClient() {
       <JsonLd data={websiteJsonLd} />
       <JsonLd data={faqJsonLd} />
 
-      <section className="home-split">
-        <div className="home-split__copy">
-          <p className="kicker">{t("station.home.kicker")}</p>
-          <h1>
-            {t("station.home.h1a")}{" "}
-            <span className="mark">{t("station.home.h1b")}</span>
-          </h1>
-          <p className="lede">{t("station.home.lede")}</p>
-          <div className="home-cta">
-            <Link className="btn-ink" href="/login">
-              {t("station.home.ctaWorkbench")}
-            </Link>
-            <Link className="btn-line" href={`/app/tools/${PRIMARY_TOOL_SLUG}`}>
-              {t("station.home.ctaCompose")}
-            </Link>
+      <section className="home-hero">
+        <div className="home-hero-in">
+          <div className="home-hero__copy">
+            <p className="kicker">{t("station.home.kicker")}</p>
+            <h1>
+              {t("station.home.h1a")}{" "}
+              <span className="mark">{t("station.home.h1b")}</span>
+            </h1>
+            <p className="lede">{t("station.home.lede")}</p>
+            <div className="home-cta">
+              <Link className="btn-ink" href="/login">
+                {t("station.home.ctaWorkbench")}
+              </Link>
+              <Link className="btn-line" href={`/app/tools/${PRIMARY_TOOL_SLUG}`}>
+                {t("station.home.ctaCompose")}
+              </Link>
+            </div>
+            <span className="note">{t("station.home.note")}</span>
           </div>
-          <span className="note">{t("station.home.note")}</span>
-        </div>
 
-        <figure className="apparatus" aria-hidden="true">
-          <div className="gate">
-            <div className="gate__sprocket gate__sprocket--l">
-              <i /><i /><i /><i /><i /><i /><i /><i />
+          <div className="home-hero__visual" aria-hidden="true">
+            <span className="ph-tag">script → storyboard</span>
+            <div className="ph-block">
+              <span className="ph-line mid" />
+              <span className="ph-line short" />
+              <span className="ph-line" />
             </div>
-            <div className="gate__sprocket gate__sprocket--r">
-              <i /><i /><i /><i /><i /><i /><i /><i />
+            <div className="ph-block">
+              <span className="ph-tag" style={{ background: "#f0fdf4", color: "#16a34a" }}>
+                shot 01
+              </span>
+              <span className="ph-line" />
+              <span className="ph-line short" />
             </div>
-            <div className="gate__frame">
-              <span className="gate__filament" />
+            <div className="ph-block">
+              <span className="ph-tag" style={{ background: "#f0fdf4", color: "#16a34a" }}>
+                shot 02
+              </span>
+              <span className="ph-line mid" />
+              <span className="ph-line short" />
             </div>
-            <div className="gate__stencil">avs · film gate</div>
+            <span className="ph-tag" style={{ background: "var(--color-accent-3)", color: "var(--color-accent)" }}>
+              compose → MP4
+            </span>
           </div>
-          <ul className="callouts">
-            <li className="callout" data-side="left" style={{ top: "22%" }}>
-              {t("station.home.callout1")}
-            </li>
-            <li className="callout" data-side="right" style={{ top: "42%" }}>
-              {t("station.home.callout2")}
-            </li>
-            <li className="callout" data-side="left" style={{ top: "64%" }}>
-              {t("station.home.callout3")}
-            </li>
-            <li className="callout" data-side="right" style={{ top: "82%" }}>
-              {t("station.home.callout4")}
-            </li>
-          </ul>
-        </figure>
+        </div>
       </section>
 
-      <section className="band-dark">
+      <section className="band-soft">
         <div className="wrap">
           <p className="kicker">{t("station.home.flowKicker")}</p>
           <h2>{t("station.home.flowTitle")}</h2>
-          <div className="steps" style={{ marginTop: "1.75rem" }}>
+          <div className="steps">
             <article className="step">
               <div className="step__n">{t("station.home.step1n")}</div>
               <h3>{t("station.home.step1h")}</h3>

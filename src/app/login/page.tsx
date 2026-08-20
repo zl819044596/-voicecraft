@@ -81,16 +81,14 @@ function LoginForm() {
 
   return (
     <main className="login-wrap">
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+      <div className="login-head">
         <LocaleSwitcher />
       </div>
       <p className="kicker">{t("station.login.kicker")}</p>
       <h1>
         {t("station.login.h1a")} <span className="mark">{t("station.login.h1b")}</span>
       </h1>
-      <p className="lede" style={{ marginTop: 14 }}>
-        {t("station.login.lede")}
-      </p>
+      <p className="lede">{t("station.login.lede")}</p>
 
       <div className="login-card">
         <button
@@ -116,9 +114,8 @@ function LoginForm() {
         {error ? <div className="form-err">{error}</div> : null}
       </div>
 
-      <p className="small muted" style={{ marginTop: 28 }}>
+      <p className="login-meta">
         <Link href="/">{t("station.login.home")}</Link>
-        {" · "}
         <Link href="/pricing">{t("station.login.pricing")}</Link>
       </p>
     </main>

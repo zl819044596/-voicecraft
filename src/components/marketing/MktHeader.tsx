@@ -15,7 +15,8 @@ export default function MktHeader() {
     <header className="mkt-header">
       <div className="mkt-header-in">
         <Link className="mkt-logo" href="/">
-          ai video studio
+          <span className="mkt-logo-mark">AI</span>
+          <span>AI Video Studio</span>
         </Link>
         <nav className="mkt-nav" aria-label={t("station.nav.tools")}>
           <Link href="/app" className={on("/app") ? "on" : undefined}>
