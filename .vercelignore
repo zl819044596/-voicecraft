@@ -1,0 +1,12 @@
+# 排除旧项目后端代码（不影响 src/app/api/ 下的路由）
+api/src
+api/db
+api/dist
+api/node_modules
+api/package.json
+api/package-lock.json
+api/tsconfig.json
+api/Dockerfile
+api/entrypoint.sh
+api/verify_min.ts
+api/verify_task49.ts
