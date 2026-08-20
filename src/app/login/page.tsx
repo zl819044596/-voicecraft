@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/api-client";
@@ -21,6 +21,32 @@ function LoginForm() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // 处理 Google OAuth 回调
+  useEffect(() => {
+    const code = searchParams.get("code");
+    const state = searchParams.get("state");
+    if (code && state) {
+      handleGoogleCallback(code, state);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleGoogleCallback = async (code: string, state: string) => {
+    setBusy(true);
+    setError(null);
+    try {
+      await apiFetch("/api/auth/google/callback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, state, age_confirmed: true }),
+      });
+      window.location.href = next;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Google login failed");
+      setBusy(false);
+    }
+  };
+
   const handleFakeLogin = async () => {
     if (busy) return;
     setBusy(true);
@@ -34,6 +60,21 @@ function LoginForm() {
       window.location.href = next;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
+      setBusy(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await apiFetch<{ authorize_url: string }>("/api/auth/google", {
+        method: "POST",
+      });
+      window.location.href = res.authorize_url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Google sign-in failed");
       setBusy(false);
     }
   };
@@ -63,7 +104,12 @@ function LoginForm() {
         <span className="note">{t("station.login.note")}</span>
 
         <div className="login-or">{t("station.login.or")}</div>
-        <button type="button" className="btn-oauth" disabled style={{ opacity: 0.4 }}>
+        <button
+          type="button"
+          className="btn-oauth"
+          onClick={handleGoogleLogin}
+          disabled={busy}
+        >
           <span className="g">G</span> {t("station.login.google")}
         </button>
 
