@@ -9,6 +9,5 @@
     "src/app/api/compose/route.ts": {
       "maxDuration": 300
     }
-  },
-  "excludeFiles": ["api/**"]
+  }
 }
