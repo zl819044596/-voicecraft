@@ -42,10 +42,18 @@ export type MeSubscription = {
   current_period_end?: string | null;
 } | null;
 
+export type MeFreeQuota = {
+  used: number;
+  limit: number;
+  remaining: number;
+  day: string;
+};
+
 export type MeResponse = {
   user: MeUser;
   credits: MeCredits;
   subscription: MeSubscription;
+  free_quota?: MeFreeQuota;
 };
 
 type AuthStatus = "loading" | "authed" | "anon";
@@ -54,6 +62,7 @@ type AuthContextValue = {
   status: AuthStatus;
   user: MeUser | null;
   credits: MeCredits | null;
+  freeQuota: MeFreeQuota | null;
   subscription: MeSubscription;
   isLoggedIn: boolean;
   /** Re-fetch /api/auth/me (e.g. after billing or settings changes). */
@@ -116,6 +125,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       status,
       user: me?.user ?? null,
       credits: me?.credits ?? null,
+      freeQuota: me?.free_quota ?? null,
       subscription: me?.subscription ?? null,
       isLoggedIn: status === "authed" && Boolean(me),
       refresh,

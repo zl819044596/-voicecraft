@@ -6,12 +6,9 @@ import {
   PROGRAMMATIC_BY_SLUG,
   TOOL_BY_SLUG,
   SITE_URL,
+  loginToTool,
 } from "@/lib/site-data";
 import { JsonLd } from "@/components/JsonLd";
-
-// Programmatic SEO Phase 1 — [verb]-[content-type] template.
-// 6 verbs × 6 content types = 36 statically generated pages. Each page
-// converges links back to its mother tool page (PRD §6.4).
 
 export function generateStaticParams() {
   return PROGRAMMATIC_PAGES.map((p) => ({ slug: p.slug }));
@@ -30,12 +27,15 @@ export async function generateMetadata({
   return {
     title: page.title,
     description: page.description,
+    keywords: [page.keyword, "AI Video Studio", "可控出片"],
     alternates: { canonical: `${SITE_URL}/${page.slug}` },
     openGraph: {
       title: page.title,
       description: page.description,
       url: `${SITE_URL}/${page.slug}`,
       type: "website",
+      locale: "zh_CN",
+      siteName: "AI Video Studio",
     },
   };
 }
@@ -65,40 +65,48 @@ export default async function ProgrammaticPage({
   const [h1Head, h1Em] = page.h1.includes(" — ")
     ? page.h1.split(" — ")
     : [page.h1, null];
+  const ctaHref = loginToTool(page.motherTool);
 
   return (
     <>
       <JsonLd data={faqJsonLd(page)} />
 
-      {/* 标题：左对齐编辑式 */}
       <section className="section" style={{ paddingBottom: 56 }}>
         <div className="wrap">
           <div className="kicker">
-            {page.verb[0].toUpperCase()}
-            {page.verb.slice(1)} · {page.content}
+            {page.verb} · {page.content}
           </div>
           <h1>
             {h1Head}
             {h1Em ? (
               <>
                 <br />
-                <em>{h1Em}.</em>
+                <em>{h1Em}</em>
               </>
             ) : null}
           </h1>
           <p className="lede" style={{ marginTop: 20, maxWidth: "52em" }}>
             {page.intro}
           </p>
+          <div className="home-cta" style={{ marginTop: 24 }}>
+            <Link className="btn-ink" href={ctaHref}>
+              {page.cta}
+            </Link>
+            {mother ? (
+              <Link className="btn-line" href={`/tools/${mother.slug}`}>
+                了解 {mother.name} →
+              </Link>
+            ) : null}
+          </div>
         </div>
       </section>
 
-      {/* 步骤：编号列表 */}
       <section className="section" style={{ paddingTop: 0, borderTop: "none" }}>
         <div className="wrap cols cols-4-8">
           <div className="col-l">
-            <div className="kicker">Eight steps</div>
+            <div className="kicker">步骤</div>
             <h2>
-              The whole process, <em>numbered.</em>
+              可控流程， <em>五步。</em>
             </h2>
           </div>
           <div className="col-r">
@@ -114,23 +122,21 @@ export default async function ProgrammaticPage({
                 </li>
               ))}
             </ol>
-            <span className="note">› 每步可复核、可重跑；static 跳过 i2v 专属的动效步</span>
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="section">
         <div className="wrap cols cols-4-8">
           <div className="col-l">
-            <div className="kicker">FAQ</div>
+            <div className="kicker">常见问题</div>
             <h2>
-              Before you <em>start.</em>
+              开始前 <em>看一眼。</em>
             </h2>
           </div>
           <div className="col-r">
-            {page.faq.map((f, i) => (
-              <div className="faq-item" key={i}>
+            {page.faq.map((f) => (
+              <div className="faq-item" key={f.q}>
                 <div className="q">{f.q}</div>
                 <p className="a">{f.a}</p>
               </div>
@@ -139,32 +145,24 @@ export default async function ProgrammaticPage({
         </div>
       </section>
 
-      {/* 母工具页内链 + CTA */}
       {mother ? (
         <section className="section">
           <div className="wrap cols cols-5-7">
             <div className="col-l">
-              <div className="kicker">Parent tool</div>
+              <div className="kicker">对应工具</div>
               <h2 style={{ marginBottom: 10 }}>{mother.name}</h2>
               <p className="small muted" style={{ maxWidth: "26em", marginBottom: 18 }}>
-                This page is one of 36 verb × content-type guides. They all converge on the
-                parent tool page.
+                本页是程序化 SEO 入口，能力收敛到母工具页与工作台一键出片。
               </p>
               <Link href={`/tools/${mother.slug}`}>/tools/{mother.slug} →</Link>
             </div>
             <div className="col-r">
-              <div className="figure">
-                120<span className="unit"> trial credits, no card</span>
-              </div>
+              <div className="figure">免费额度</div>
               <p className="small muted" style={{ margin: "10px 0 18px", maxWidth: "32em" }}>
-                Enough for about two static videos. BYOK stays free forever; managed plans
-                from $9.99/mo.
+                演示登录即可体验。成片与素材包双出口，不满意就自己剪。
               </p>
-              <Link className="btn-ink" href="/login">
-                Start Free
-              </Link>
-              <Link href="/pricing" style={{ marginLeft: 18 }}>
-                Pricing →
+              <Link className="btn-ink" href={ctaHref}>
+                {page.cta}
               </Link>
             </div>
           </div>

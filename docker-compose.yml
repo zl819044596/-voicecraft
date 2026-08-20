@@ -211,7 +211,7 @@ services:
       # ACME webroot shared with the certbot one-shot service (HTTP-01).
       - ./certs/webroot:/var/www/certbot:rw
       # app/ 新前端静态产物（Vite SPA, nginx / → index.html fallback）
-      - ./app/dist:/www/app:ro
+      - ./legacy-vite/dist:/www/app:ro
     depends_on:
       api:
         condition: service_healthy

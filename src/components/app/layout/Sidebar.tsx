@@ -1,79 +1,71 @@
 "use client";
 
-// 侧边导航 — 对照原型 app.html 的 side-nav：side-logo + 四组（Create/Config/
-// Library/Account）共 11 项，当前路由 nav-item active。图标不用 emoji，
-// 文案走 i18n（nav.* 键，如 "工作台 Dashboard"）。
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { PRIMARY_TOOL_SLUG, SECONDARY_TOOLS } from "@/lib/tools-config";
 import { useTranslation } from "@/i18n";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 
-type NavItem = { href: string; labelKey: string };
-type NavGroup = { groupKey: string; items: NavItem[] };
+const PRIMARY_HREF = `/app/tools/${PRIMARY_TOOL_SLUG}`;
 
-const GROUPS: NavGroup[] = [
-  {
-    groupKey: "nav.groupCreate",
-    items: [
-      { href: "/app", labelKey: "nav.dashboard" },
-      { href: "/app/quick", labelKey: "nav.quick" },
-      { href: "/app/tasks", labelKey: "nav.tasks" },
-      { href: "/app/projects", labelKey: "nav.projects" },
-    ],
-  },
-  {
-    groupKey: "nav.groupConfig",
-    items: [
-      { href: "/app/models", labelKey: "nav.models" },
-      { href: "/app/prompts", labelKey: "nav.prompts" },
-      { href: "/app/rules", labelKey: "nav.rules" },
-    ],
-  },
-  {
-    groupKey: "nav.groupLibrary",
-    items: [
-      { href: "/app/products", labelKey: "nav.products" },
-      { href: "/app/benchmarks", labelKey: "nav.benchmarks" },
-      { href: "/app/assets", labelKey: "nav.assets" },
-    ],
-  },
-  {
-    groupKey: "nav.groupAccount",
-    items: [
-      { href: "/app/billing", labelKey: "nav.billing" },
-      { href: "/app/settings", labelKey: "nav.settings" },
-    ],
-  },
-];
+/** Tool display names stay bilingual via config + locale */
+const TOOL_NAME_EN: Record<string, string> = {
+  "script-to-video": "One-click compose",
+  "storyboard-generator": "Storyboard",
+  "ai-video-script-writer": "Script writer",
+  "ai-voiceover": "Voiceover",
+  "subtitle-generator": "Subtitles",
+  "image-generator": "Image",
+};
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const isActive = (href: string) =>
     href === "/app"
       ? pathname === "/app"
       : pathname === href || pathname.startsWith(`${href}/`);
 
+  const toolName = (slug: string, zhName: string) =>
+    locale === "en" ? TOOL_NAME_EN[slug] ?? zhName : zhName;
+
   return (
     <aside className="side-nav">
       <Link className="side-logo" href="/">
-        AI Video <em>Studio</em>
+        ai video <em>studio</em>
       </Link>
-      {GROUPS.map((group) => (
-        <div key={group.groupKey}>
-          <div className="nav-group">{t(group.groupKey)}</div>
-          {group.items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`nav-item${isActive(item.href) ? " active" : ""}`}
-            >
-              {t(item.labelKey)}
-            </Link>
-          ))}
-        </div>
+
+      <div className="nav-group">{t("station.app.sideMain")}</div>
+      <Link href="/app" className={`nav-item${isActive("/app") && pathname === "/app" ? " active" : ""}`}>
+        {t("station.app.sideHome")}
+      </Link>
+      <Link href={PRIMARY_HREF} className={`nav-item${isActive(PRIMARY_HREF) ? " active" : ""}`}>
+        {t("station.app.sideCompose")}
+      </Link>
+
+      <div className="nav-group">{t("station.app.sideMore")}</div>
+      {SECONDARY_TOOLS.map((tool) => (
+        <Link
+          key={tool.slug}
+          href={`/app/tools/${tool.slug}`}
+          className={`nav-item${isActive(`/app/tools/${tool.slug}`) ? " active" : ""}`}
+        >
+          {toolName(tool.slug, tool.name)}
+        </Link>
       ))}
+
+      <div className="nav-group">{t("station.app.sideAccount")}</div>
+      <Link
+        href="/app/settings"
+        className={`nav-item${isActive("/app/settings") ? " active" : ""}`}
+      >
+        {t("station.app.sideQuota")}
+      </Link>
+
+      <div style={{ marginTop: "auto", padding: "16px 12px 8px" }}>
+        <LocaleSwitcher />
+      </div>
     </aside>
   );
 }

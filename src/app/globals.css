@@ -1,101 +1,60 @@
 @import "tailwindcss";
 
-/* Task 12 — the static shop-video prototype ships two themes (light / dark,
-   purple accent). The html element carries class="dark" by default (root
-   layout + theme script); every @theme token below resolves through the
-   runtime vars in :root/.dark, so all bg-*, text-* and border-* utilities
-   follow the active theme. The dark: variant stays tied to the .dark class
-   so pre-existing dark-only components keep working unchanged. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── 亮色主题（静态原型 :root 令牌） ── */
 :root {
-  color-scheme: light;
-  --app-bg: #f5f7fb;
-  --app-bg-subtle: #ffffff; /* 侧边栏、卡片、面板 */
-  --app-bg-muted: #eef1f8; /* 悬停、选中背景 */
-  --app-bg-elevated: #ffffff; /* 卡片、对话框、下拉菜单 */
-  --app-border: #e0e5ef;
-  --app-border-strong: #c8d0df;
-  --app-text-primary: #171a24;
-  --app-text-secondary: #687084;
-  --app-text-tertiary: #8c93a3;
-  --app-text-disabled: #b4b9c6;
+  color-scheme: dark;
+  --app-bg: oklch(13% 0.014 265);
+  --app-bg-subtle: oklch(17% 0.016 265);
+  --app-bg-muted: oklch(21% 0.018 265);
+  --app-bg-elevated: oklch(17% 0.016 265);
+  --app-border: oklch(96% 0.006 262 / 0.12);
+  --app-border-strong: oklch(96% 0.006 262 / 0.2);
+  --app-text-primary: oklch(96% 0.006 262);
+  --app-text-secondary: oklch(72% 0.014 262);
+  --app-text-tertiary: oklch(55% 0.014 262);
+  --app-text-disabled: oklch(42% 0.012 262);
 
-  --app-brand: #e0622e;
-  --app-brand-hover: #ea6c37;
-  --app-brand-active: #d9551f;
-  --app-brand-subtle: rgba(224, 98, 46, 0.12);
+  --app-brand: oklch(76% 0.17 50);
+  --app-brand-hover: oklch(80% 0.16 50);
+  --app-brand-active: oklch(70% 0.16 50);
+  --app-brand-subtle: oklch(76% 0.17 50 / 0.14);
 
-  --app-success: #16804a;
-  --app-success-bg: rgba(90, 209, 141, 0.14);
-  --app-warning: #c56b20;
-  --app-warning-bg: rgba(246, 179, 95, 0.14);
-  --app-error: #cf3d4a;
-  --app-error-bg: rgba(255, 106, 123, 0.14);
-  --app-info: #3769d6;
-  --app-info-bg: rgba(126, 162, 255, 0.14);
-  --app-stale: #c56b20;
-  --app-stale-bg: rgba(246, 179, 95, 0.16);
-  --app-pending: #8c93a3;
+  --app-success: oklch(70% 0.12 150);
+  --app-success-bg: oklch(70% 0.12 150 / 0.14);
+  --app-warning: oklch(76% 0.14 70);
+  --app-warning-bg: oklch(76% 0.14 70 / 0.14);
+  --app-error: oklch(65% 0.16 20);
+  --app-error-bg: oklch(65% 0.16 20 / 0.14);
+  --app-info: oklch(72% 0.08 250);
+  --app-info-bg: oklch(72% 0.08 250 / 0.14);
+  --app-stale: oklch(76% 0.14 70);
+  --app-stale-bg: oklch(76% 0.14 70 / 0.14);
+  --app-pending: oklch(55% 0.014 262);
 }
 
-/* ── 暗色主题（DESIGN-BRIEF v2.2 Studio Dark 令牌；App 区固定深色，根 html 恒带 .dark） ── */
 .dark {
   color-scheme: dark;
-  --app-bg: #131416;
-  --app-bg-subtle: #1a1c1f;
-  --app-bg-muted: #212427;
-  --app-bg-elevated: #1a1c1f;
-  --app-border: #2c2f33;
-  --app-border-strong: #3a3d42;
-  --app-text-primary: #e7e4df;
-  --app-text-secondary: #98938a;
-  --app-text-tertiary: #5f5a53;
-  --app-text-disabled: #5f5a53;
-
-  --app-brand: #e0622e;
-  --app-brand-hover: #ea6c37;
-  --app-brand-active: #d9551f;
-  --app-brand-subtle: rgba(224, 98, 46, 0.16);
-
-  --app-success: #7aa87a;
-  --app-success-bg: rgba(122, 168, 122, 0.14);
-  --app-warning: #d4a24c;
-  --app-warning-bg: rgba(212, 162, 76, 0.14);
-  --app-error: #c25b4e;
-  --app-error-bg: rgba(194, 91, 78, 0.14);
-  --app-info: #98938a;
-  --app-info-bg: rgba(152, 147, 138, 0.14);
-  --app-stale: #d4a24c;
-  --app-stale-bg: rgba(212, 162, 76, 0.16);
-  --app-pending: #5f5a53;
 }
 
 @theme inline {
-  /* ── 字体 ── */
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans: var(--font-sora), "Sora", system-ui, sans-serif;
+  --font-mono: var(--font-mono-jb), "JetBrains Mono", ui-monospace, monospace;
 
-  /* ── 中性色（随主题切换） ── */
-  --color-bg: var(--app-bg); /* 页面背景 */
-  --color-bg-subtle: var(--app-bg-subtle); /* 面板、侧边栏、卡片 */
-  --color-bg-muted: var(--app-bg-muted); /* 悬停、选中背景 */
-  --color-bg-elevated: var(--app-bg-elevated); /* 卡片、对话框、下拉菜单 */
-  --color-border: var(--app-border); /* 边框 */
-  --color-border-strong: var(--app-border-strong); /* 强调边框 */
-  --color-text-primary: var(--app-text-primary); /* 主文本 */
-  --color-text-secondary: var(--app-text-secondary); /* 辅助文本 */
-  --color-text-tertiary: var(--app-text-tertiary); /* 次要辅助文本 */
-  --color-text-disabled: var(--app-text-disabled); /* 禁用文本 */
-
-  /* ── 品牌色（紫） ── */
+  --color-bg: var(--app-bg);
+  --color-bg-subtle: var(--app-bg-subtle);
+  --color-bg-muted: var(--app-bg-muted);
+  --color-bg-elevated: var(--app-bg-elevated);
+  --color-border: var(--app-border);
+  --color-border-strong: var(--app-border-strong);
+  --color-text-primary: var(--app-text-primary);
+  --color-text-secondary: var(--app-text-secondary);
+  --color-text-tertiary: var(--app-text-tertiary);
+  --color-text-disabled: var(--app-text-disabled);
   --color-brand: var(--app-brand);
   --color-brand-hover: var(--app-brand-hover);
   --color-brand-active: var(--app-brand-active);
   --color-brand-subtle: var(--app-brand-subtle);
-
-  /* ── 语义色 ── */
   --color-success: var(--app-success);
   --color-success-bg: var(--app-success-bg);
   --color-warning: var(--app-warning);
@@ -104,42 +63,7 @@
   --color-error-bg: var(--app-error-bg);
   --color-info: var(--app-info);
   --color-info-bg: var(--app-info-bg);
-
-  /* ── 特殊色（流水线节点） ── */
   --color-stale: var(--app-stale);
   --color-stale-bg: var(--app-stale-bg);
   --color-pending: var(--app-pending);
-
-  /* ── 圆角（DESIGN-BRIEF v2.2：统一 4px；rounded-full 仅保留真圆/头像/状态点） ── */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.25rem;
-  --radius-lg: 0.25rem;
-  --radius-xl: 0.25rem;
-  --radius-2xl: 0.25rem;
-  --radius-full: 9999px;
-
-  /* ── 阴影（DESIGN-BRIEF v2.2：不用阴影，一律 1px 边框） ── */
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
-  --shadow-xl: none;
-}
-
-body {
-  background: var(--color-bg);
-  color: var(--color-text-primary);
-  font-family: var(--font-sans);
-  transition: background 0.2s, color 0.2s;
-}
-
-/* 品牌色单一化（DESIGN-BRIEF v2.2：全站唯一强调橙，禁用彩色渐变） */
-:root {
-  --app-accent-gradient: linear-gradient(100deg, #e0622e 0%, #e0622e 100%);
-  --app-brand-title-gradient: linear-gradient(100deg, #e0622e 0%, #e0622e 100%);
-  --app-accent-shadow: rgba(224, 98, 46, 0.28);
-}
-.dark {
-  --app-accent-gradient: linear-gradient(100deg, #e0622e 0%, #e0622e 100%);
-  --app-brand-title-gradient: linear-gradient(100deg, #e0622e 0%, #e0622e 100%);
-  --app-accent-shadow: rgba(224, 98, 46, 0.28);
 }

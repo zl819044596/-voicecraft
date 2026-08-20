@@ -1,34 +1,53 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Instrument_Serif, JetBrains_Mono, Sora } from "next/font/google";
 import CookieBanner from "@/components/CookieBanner";
 import { SessionProvider } from "@/lib/auth-context";
 import { SITE_URL } from "@/lib/site-data";
 import "./globals.css";
-// App 区 Studio Dark 主题（/app 路由子树使用；marketing.css 在其各自的
-// 路由组 layout 加载。两者 CSS 变量与类名互不冲突，全局注入一次）。
 import "./app-studio.css";
+
+const instrument = Instrument_Serif({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-instrument",
+  display: "swap",
+});
+
+const sora = Sora({
+  subsets: ["latin"],
+  variable: "--font-sora",
+  display: "swap",
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono-jb",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "AI Video Studio — Storyboard-first AI Video Creator",
-    template: "%s | AI Video Studio",
+    default: "AI Video Studio",
+    template: "%s · AI Video Studio",
   },
-  description:
-    "Storyboard-first AI video creation workbench. Script, storyboard, per-shot images, voiceover, subtitles and open export — run the whole pipeline on your own keys.",
-  alternates: {
-    canonical: "/",
+  description: "写文案、审分镜、一键出片。可控短视频工具站——静帧口播，不是黑盒生成。",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "zh_CN",
+    siteName: "AI Video Studio",
   },
 };
 
-// Root layout — no chrome. Marketing pages get Nav + Footer from the
-// (marketing) route-group layout; /app pages get the workbench layout from
-// app/layout.tsx; /login renders standalone by design. The workbench theme is
-// fixed dark (marketing.css / app-studio.css control their own surfaces).
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark h-full antialiased">
-      <body className="min-h-full font-sans">
+    <html
+      lang="zh-CN"
+      className={`${instrument.variable} ${sora.variable} ${mono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full" style={{ fontFamily: "var(--font-sora), system-ui, sans-serif" }}>
         <SessionProvider>{children}</SessionProvider>
         <CookieBanner />
       </body>

@@ -4,12 +4,15 @@ import { notFound } from "next/navigation";
 import {
   SCENARIOS,
   SCENARIO_BY_SLUG,
+  TOOL_BY_SLUG,
   SITE_URL,
+  loginToTool,
   type Scenario,
 } from "@/lib/site-data";
 import { JsonLd } from "@/components/JsonLd";
+import { getRequestLocale } from "@/i18n/server";
+import { localizeScenario, localizeTool } from "@/lib/site-locale";
 
-// Static generation for all 5 scenario pages.
 export function generateStaticParams() {
   return SCENARIOS.map((s) => ({ slug: s.slug }));
 }
@@ -24,15 +27,20 @@ export async function generateMetadata({
   const { slug } = await params;
   const scenario = SCENARIO_BY_SLUG[slug];
   if (!scenario) return {};
+  const locale = await getRequestLocale();
+  const s = localizeScenario(scenario, locale);
   return {
-    title: scenario.title,
-    description: scenario.description,
-    alternates: { canonical: `${SITE_URL}/scenarios/${scenario.slug}` },
+    title: s.title,
+    description: s.description,
+    keywords: [s.keyword, "AI Video Studio"],
+    alternates: { canonical: `${SITE_URL}/scenarios/${s.slug}` },
     openGraph: {
-      title: scenario.title,
-      description: scenario.description,
-      url: `${SITE_URL}/scenarios/${scenario.slug}`,
-      type: "website",
+      title: s.title,
+      description: s.description,
+      url: `${SITE_URL}/scenarios/${s.slug}`,
+      type: "article",
+      locale: locale === "zh" ? "zh_CN" : "en_US",
+      siteName: "AI Video Studio",
     },
   };
 }
@@ -45,57 +53,9 @@ function articleJsonLd(scenario: Scenario) {
     description: scenario.description,
     about: scenario.audience,
     author: { "@type": "Organization", name: "AI Video Studio" },
+    mainEntityOfPage: `${SITE_URL}/scenarios/${scenario.slug}`,
   };
 }
-
-// 场景分类短名（标题 kicker，对照原型 "Scenarios — Freelancers"）
-const SCENARIO_KICKER: Record<string, string> = {
-  "client-video-delivery": "Freelancers",
-  "youtube-script-to-video": "Creators",
-  "social-ads-video": "Marketing",
-  "product-demo-video": "Product",
-  "video-localization": "Localization",
-};
-
-// 工作流步骤（场景页模板，原型 scenario-client-video-delivery.html 同构）
-const WORKFLOW_STEPS: { h3: string; tag: string; p: string }[] = [
-  {
-    h3: "Brief in, script out",
-    tag: "· L1–L2",
-    p: "Paste the brief, a URL or talking points. Get a draft script, version it, and sign off on words before a single frame renders.",
-  },
-  {
-    h3: "Approve the storyboard together",
-    tag: "· L3",
-    p: "Walk through 6–12 shots in a table: scene, voiceover, subtitle, prompt. This is the cheap moment to change your mind — edits here cost nothing on BYOK.",
-  },
-  {
-    h3: "Render, then revise per shot",
-    tag: "· L4–L8",
-    p: "Generate frames (static) or moving clips (i2v), voiceover and subtitles, then compose. One shot wrong? Re-run just that shot; the rest stay untouched.",
-  },
-  {
-    h3: "Hand over an open export",
-    tag: "· L9–L10",
-    p: "Run the final review step, then export everything as a zip — the MP4 and, if the contract calls for it, the full source package too.",
-  },
-];
-
-// 痛点（场景页模板同构，通用三条）
-const PAIN_STEPS: { h3: string; p: string }[] = [
-  {
-    h3: "Revisions are unbounded",
-    p: "“Can we change shot three?” usually means re-doing the whole render. Every round of feedback burns hours you cannot invoice.",
-  },
-  {
-    h3: "AI output is a black box",
-    p: "One-click text-to-video tools give you a take-it-or-leave-it clip. When one scene is wrong, you regenerate everything and pray.",
-  },
-  {
-    h3: "Platforms lock the project in",
-    p: "If the assets, script and storyboard live inside a subscription editor, finishing the job in your own NLE — or handing source files over — is off the table.",
-  },
-];
 
 export default async function ScenarioPage({
   params,
@@ -103,22 +63,45 @@ export default async function ScenarioPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const scenario = SCENARIO_BY_SLUG[slug];
-  if (!scenario) notFound();
+  const base = SCENARIO_BY_SLUG[slug];
+  if (!base) notFound();
+  const locale = await getRequestLocale();
+  const scenario = localizeScenario(base, locale);
 
-  const kicker = SCENARIO_KICKER[scenario.slug] ?? "Use cases";
   const [h1Head, h1Em] = scenario.h1.includes(" — ")
     ? scenario.h1.split(" — ")
     : [scenario.h1, null];
+  const relatedTools = scenario.toolSlugs
+    .map((s) => TOOL_BY_SLUG[s])
+    .filter((t): t is NonNullable<typeof t> => Boolean(t))
+    .map((t) => localizeTool(t, locale));
+  const ctaHref = loginToTool(scenario.toolSlugs[0] ?? "script-to-video");
+  const audienceLabel = locale === "zh" ? "适合：" : "For: ";
+  const painKicker = locale === "zh" ? "痛点" : "Pain";
+  const flowKicker = locale === "zh" ? "流程" : "Workflow";
+  const deliverKicker = locale === "zh" ? "交付" : "Deliverable";
+  const deliverTitle =
+    locale === "zh" ? (
+      <>
+        成片，或 <em>素材包。</em>
+      </>
+    ) : (
+      <>
+        MP4, or an <em>asset pack.</em>
+      </>
+    );
+  const relatedKicker = locale === "zh" ? "相关工具" : "Related tools";
+  const relatedTitle = locale === "zh" ? "入口" : "Start here";
 
   return (
     <>
       <JsonLd data={articleJsonLd(scenario)} />
 
-      {/* 标题：左对齐编辑式 */}
       <section className="section" style={{ paddingBottom: 56 }}>
         <div className="wrap">
-          <div className="kicker">Scenarios — {kicker}</div>
+          <div className="kicker">
+            {locale === "zh" ? "场景" : "Scenario"} · {scenario.name}
+          </div>
           <h1>
             {h1Head}
             {h1Em ? (
@@ -131,22 +114,38 @@ export default async function ScenarioPage({
           <p className="lede" style={{ marginTop: 20 }}>
             {scenario.intro}
           </p>
+          <p className="small muted" style={{ marginTop: 12 }}>
+            {audienceLabel}
+            {scenario.audience}
+          </p>
+          <div className="home-cta" style={{ marginTop: 24 }}>
+            <Link className="btn-ink" href={ctaHref}>
+              {scenario.cta}
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* 痛点：编号列表 */}
       <section className="section" style={{ paddingTop: 0, borderTop: "none" }}>
         <div className="wrap cols cols-4-8">
           <div className="col-l">
-            <div className="kicker">The pain</div>
+            <div className="kicker">{painKicker}</div>
             <h2>
-              Why this work <em>eats margin.</em>
+              {locale === "zh" ? (
+                <>
+                  为什么总在 <em>亏时间。</em>
+                </>
+              ) : (
+                <>
+                  Why this work <em>eats time.</em>
+                </>
+              )}
             </h2>
           </div>
           <div className="col-r">
             <ol className="num-list">
-              {PAIN_STEPS.map((s, i) => (
-                <li key={i}>
+              {scenario.pains.map((s, i) => (
+                <li key={s.h3}>
                   <span className="n">{String(i + 1).padStart(2, "0")}</span>
                   <div>
                     <h3>{s.h3}</h3>
@@ -161,13 +160,20 @@ export default async function ScenarioPage({
         </div>
       </section>
 
-      {/* 工作流：编号列表 */}
       <section className="section">
         <div className="wrap cols cols-4-8">
           <div className="col-l">
-            <div className="kicker">The workflow</div>
+            <div className="kicker">{flowKicker}</div>
             <h2>
-              The same pipeline, <em>every time.</em>
+              {locale === "zh" ? (
+                <>
+                  同一条主路径， <em>每次都这样。</em>
+                </>
+              ) : (
+                <>
+                  Same main path, <em>every time.</em>
+                </>
+              )}
             </h2>
             <p className="lede" style={{ marginTop: 16 }}>
               {scenario.body[0]}
@@ -175,15 +181,13 @@ export default async function ScenarioPage({
           </div>
           <div className="col-r">
             <ol className="num-list">
-              {WORKFLOW_STEPS.map((s, i) => (
-                <li key={i}>
+              {scenario.workflow.map((s, i) => (
+                <li key={s.h3}>
                   <span className="n">{String(i + 1).padStart(2, "0")}</span>
                   <div>
                     <h3>
                       {s.h3}{" "}
-                      <span className="small muted" style={{ fontFamily: "system-ui" }}>
-                        {s.tag}
-                      </span>
+                      <span className="small muted">{s.tag}</span>
                     </h3>
                     <p className="small muted" style={{ marginTop: 6, maxWidth: "38em" }}>
                       {s.p}
@@ -192,67 +196,55 @@ export default async function ScenarioPage({
                 </li>
               ))}
             </ol>
-            <span className="note">
-              › 交付前人工复核门：semi 模式默认在 L8 合成前暂停
-            </span>
           </div>
         </div>
       </section>
 
-      {/* 交付物：zip 目录树 */}
+      {scenario.body.slice(1).map((para, i) => (
+        <section key={i} className="section" style={{ paddingTop: 0 }}>
+          <div className="wrap" style={{ maxWidth: "40em" }}>
+            <p className="lede">{para}</p>
+          </div>
+        </section>
+      ))}
+
       <section className="section">
         <div className="wrap">
-          <div className="kicker">The deliverable</div>
-          <h2 style={{ maxWidth: "22em" }}>
-            What the client actually <em>receives.</em>
-          </h2>
-          <p className="lede" style={{ marginTop: 16, maxWidth: "52em" }}>
-            Not a platform link that expires with your subscription — a folder of files you
-            own. The zip is retained for 30 days, then cleaned automatically.
-          </p>
-          <div className="codeblock" style={{ marginTop: 28, maxWidth: "34em" }}>
-            <span className="cm"># project-export-20260811.zip — step L10 output</span>
+          <div className="kicker">{deliverKicker}</div>
+          <h2 style={{ maxWidth: "22em" }}>{deliverTitle}</h2>
+          <div className="codeblock" style={{ marginTop: 28, maxWidth: "36em" }}>
+            <span className="cm"># avs-export.zip</span>
             {`
-project-export.zip
-├─ final.mp4            # composed video, subtitles burned or sidecar
-├─ storyboard.json      # full shot list: scene/voiceover/prompt per shot
-├─ script.md            # approved narration script
-├─ assets/
-│  ├─ shots/            # per-shot PNG frames
-│  ├─ clips/            # per-shot clips (i2v mode)
-│  ├─ audio/            # per-shot TTS voiceover
-│  └─ subtitles.srt
-└─ LICENSE.txt          # usage terms for client handover`}
+avs-export/
+├─ script.txt
+├─ storyboard.json
+├─ README.txt
+└─ shots/
+   ├─ 01/image.png · voice.mp3 · subtitle.txt
+   └─ 02/…`}
           </div>
-          <span className="note">› 导出 zip 保留 30 天（CONTRACT C7），过期 410</span>
         </div>
       </section>
 
-      {/* 双轨 CTA */}
       <section className="section">
-        <div className="wrap cols cols-5-7">
+        <div className="wrap cols cols-4-8">
           <div className="col-l">
-            <div className="figure">$0</div>
-            <h3 style={{ marginTop: 10 }}>BYOK for your studio</h3>
-            <p className="small muted" style={{ margin: "6px 0 18px", maxWidth: "24em" }}>
-              Unlimited projects on your own keys. Cost per video = your provider rates.
-            </p>
-            <Link className="btn-ink" href="/login">
-              Start Free
-            </Link>
+            <div className="kicker">{relatedKicker}</div>
+            <h2>{relatedTitle}</h2>
           </div>
           <div className="col-r">
-            <div className="figure">
-              60<span className="unit"> credits / static video</span>
+            <ul className="link-list">
+              {relatedTools.map((t) => (
+                <li key={t.slug}>
+                  <Link href={`/tools/${t.slug}`}>{t.name}</Link>
+                </li>
+              ))}
+            </ul>
+            <div style={{ marginTop: 24 }}>
+              <Link className="btn-ink" href={ctaHref}>
+                {scenario.cta}
+              </Link>
             </div>
-            <h3 style={{ marginTop: 10 }}>Disclosed, not hidden</h3>
-            <p className="small muted" style={{ margin: "6px 0 18px", maxWidth: "32em" }}>
-              300 credits per i2v video (1 i2v = 5 static). Credit rates are fixed and
-              published — easy to fold into a fixed-price quote.
-            </p>
-            <Link className="btn-line" href="/pricing">
-              See pricing →
-            </Link>
           </div>
         </div>
       </section>
