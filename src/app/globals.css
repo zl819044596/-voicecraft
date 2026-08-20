@@ -4,25 +4,25 @@
 
 /* ─────────────────────────────────────────────────────────────
    AI 工具站 · 设计令牌（浅色主题）
-   白底灰字 · 主色 #2563eb · 辅助色 #f0f5ff · 文字 #1e293b/#64748b
+   灰底白卡 · 主色 #3b82f6 · 辅助色 #eff6ff · 文字 #18181b/#52525b
    ───────────────────────────────────────────────────────────── */
 :root {
   color-scheme: light;
   --app-bg: #ffffff;
-  --app-bg-subtle: #f8fafc;
-  --app-bg-muted: #f1f5f9;
+  --app-bg-subtle: #ffffff;
+  --app-bg-muted: #f4f4f5;
   --app-bg-elevated: #ffffff;
-  --app-border: #e2e8f0;
-  --app-border-strong: #cbd5e1;
-  --app-text-primary: #1e293b;
-  --app-text-secondary: #64748b;
-  --app-text-tertiary: #94a3b8;
-  --app-text-disabled: #cbd5e1;
+  --app-border: #e4e4e7;
+  --app-border-strong: #d4d4d8;
+  --app-text-primary: #18181b;
+  --app-text-secondary: #52525b;
+  --app-text-tertiary: #a1a1aa;
+  --app-text-disabled: #d4d4d8;
 
-  --app-brand: #2563eb;
-  --app-brand-hover: #1d4ed8;
-  --app-brand-active: #1e40af;
-  --app-brand-subtle: #f0f5ff;
+  --app-brand: #3b82f6;
+  --app-brand-hover: #2563eb;
+  --app-brand-active: #1d4ed8;
+  --app-brand-subtle: #eff6ff;
 
   --app-success: #16a34a;
   --app-success-bg: #f0fdf4;
@@ -30,15 +30,15 @@
   --app-warning-bg: #fffbeb;
   --app-error: #dc2626;
   --app-error-bg: #fef2f2;
-  --app-info: #2563eb;
-  --app-info-bg: #f0f5ff;
+  --app-info: #3b82f6;
+  --app-info-bg: #eff6ff;
   --app-stale: #d97706;
   --app-stale-bg: #fffbeb;
-  --app-pending: #94a3b8;
+  --app-pending: #a1a1aa;
 
   /* 卡片轻阴影 */
-  --app-shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 14px -4px rgb(15 23 42 / 0.08);
-  --app-shadow-card-hover: 0 6px 24px -8px rgb(15 23 42 / 0.14);
+  --app-shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 1px 3px rgb(0 0 0 / 0.06);
+  --app-shadow-card-hover: 0 6px 20px -6px rgb(0 0 0 / 0.12);
 }
 
 .dark {

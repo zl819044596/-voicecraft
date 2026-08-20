@@ -17,7 +17,7 @@ export default function ToolsIndexPage() {
 
       <Link
         href={`/app/tools/${PRIMARY_TOOL.slug}`}
-        className="group mb-8 flex items-center gap-4 rounded-xl border border-brand/30 bg-brand-subtle p-5 shadow-card transition-all hover:-translate-y-0.5 hover:border-brand/50 hover:shadow-card-hover"
+        className="group mb-8 flex items-center gap-4 rounded-xl border border-brand/40 bg-white p-5 shadow-card transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-card-hover"
       >
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand text-2xl text-white shadow-sm">
           {PRIMARY_TOOL.icon}
@@ -57,7 +57,7 @@ export default function ToolsIndexPage() {
           <Link
             key={tool.slug}
             href={`/app/tools/${tool.slug}`}
-            className="group rounded-xl border border-border bg-bg-subtle p-4 shadow-card transition-all hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-card-hover"
+            className="group rounded-xl border border-border bg-white p-4 shadow-card transition-all hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-card-hover"
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-lg shadow-sm">
               {tool.icon}

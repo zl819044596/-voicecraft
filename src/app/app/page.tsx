@@ -54,7 +54,7 @@ export default function DashboardPage() {
         </Link>
       </header>
 
-      <Link href={`/app/tools/${PRIMARY_TOOL.slug}`} className="wb-primary-card">
+      <Link href={`/app/tools/${PRIMARY_TOOL.slug}`} className="wb-primary-card group">
         <span className="wb-icon">{PRIMARY_TOOL.icon}</span>
         <span className="min-w-0 flex-1">
           <span className="wb-tool-name">{name(PRIMARY_TOOL.slug, PRIMARY_TOOL.name)}</span>
@@ -69,7 +69,7 @@ export default function DashboardPage() {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="self-center shrink-0 text-text-tertiary"
+          className="self-center shrink-0 text-text-tertiary transition-transform group-hover:translate-x-0.5 group-hover:text-brand"
           aria-hidden
         >
           <path d="M5 12h14M13 6l6 6-6 6" />

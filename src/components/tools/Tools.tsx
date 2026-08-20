@@ -782,10 +782,10 @@ export function MakeVideoTool() {
                 key={k}
                 type="button"
                 onClick={() => setMode(k)}
-                className={`rounded border px-3 py-1 text-[12px] ${
+                className={`rounded border px-3 py-1 text-[12px] transition-colors ${
                   mode === k
-                    ? "border-brand bg-brand-subtle text-brand"
-                    : "border-border text-text-secondary"
+                    ? "border-brand bg-brand-subtle font-medium text-brand"
+                    : "border-border text-text-secondary hover:border-border-strong hover:text-text-primary"
                 }`}
               >
                 {t(labelKey)}
