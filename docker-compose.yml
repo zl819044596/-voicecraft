@@ -1,0 +1,254 @@
+# AI Video Studio — Docker Compose (HTTPS production-ready)
+#
+# Services: web (Next.js) · api (Express) · postgres · redis · minio ·
+#           render (ffmpeg worker) · nginx (reverse proxy, TLS) · certbot
+#
+# Usage:
+#   ./scripts/ensure-certs.sh          # self-signed dev certs if none exist
+#   docker compose up -d --build       # build + start everything
+#   docker compose ps                  # status / health
+#
+# Production (R6): set DOMAIN/ACME_EMAIL/NEXT_PUBLIC_SITE_URL + real secrets
+# in .env, then run ./scripts/issue-cert.sh (Let's Encrypt), ./scripts/deploy.sh
+# and schedule ./scripts/backup.sh. See DEPLOYMENT.md for the full runbook.
+
+name: ai-video-studio
+
+services:
+  # -------------------------------------------------------------------------
+  # Backend API — Express (BYOK key storage, 9-step pipeline orchestrator)
+  # -------------------------------------------------------------------------
+  api:
+    # Workspace-aware build from the repo root: compiles @avs/shared + api,
+    # installs prod deps, and boots with entrypoint.sh which runs the canonical
+    # 19-table migration (schema.sql) before the server starts — no runtime
+    # ensureSchema divergence.
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    image: avs/api:stage0
+    restart: unless-stopped
+    # Expose API to host ONLY for local dev/debug (127.0.0.1 bind — R6:
+    # never publish beyond the host; nginx reaches api over avs_net).
+    ports:
+      - "127.0.0.1:4000:4000"
+    # Explicit upstream DNS — Docker's internal resolver (127.0.0.11) has no
+    # external nameservers on this host, so containers can't resolve public
+    # domains like maas.wing-ray.cn without this. (2026-08-08)
+    dns:
+      - 223.5.5.5
+      - 119.29.29.29
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: ${POSTGRES_DB:-ai_video_studio}
+      PGUSER: ${POSTGRES_USER:-avs}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-avs_dev_password}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: "false"
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      # BYOK key encryption master key (R1) — injected from host .env, never
+      # baked into the image. Required for the /api/keys endpoints.
+      ENC_KEY: ${ENC_KEY:?ENC_KEY must be set in .env — see .env.example}
+      # Provider mode — true = mock providers (dev/demo); false = real wingray
+      # (one BYOK key covers LLM/image/TTS, configured in Settings).
+      MOCK_PROVIDERS: ${MOCK_PROVIDERS:-true}
+      # P5 billing (Creem Merchant of Record) — optional; absent → billing
+      # endpoints/webhook answer 503 BILLING_NOT_CONFIGURED, app still boots.
+      CREEM_API_KEY: ${CREEM_API_KEY:-}
+      CREEM_WEBHOOK_SECRET: ${CREEM_WEBHOOK_SECRET:-}
+      # Session HMAC key + auth (C1). Unset → session falls back to an
+      # ephemeral random key (invalid across restarts); Google OAuth answers
+      # OAUTH_NOT_CONFIGURED; SMTP magic-link emails degrade to dev echo.
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://aivideostudio.app}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - avs_net
+
+  # -------------------------------------------------------------------------
+  # PostgreSQL 16 — business data + BYOK key encrypted columns (W5)
+  # -------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ai_video_studio}
+      POSTGRES_USER: ${POSTGRES_USER:-avs}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-avs_dev_password}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-avs} -d ${POSTGRES_DB:-ai_video_studio}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - avs_net
+    # not published to host in stage 0; expose via api only
+    # ports:
+    #   - "5432:5432"
+
+  # -------------------------------------------------------------------------
+  # Redis 7 — queue / job orchestration (9-step pipeline state machine)
+  # -------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:-}"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - avs_net
+
+  # -------------------------------------------------------------------------
+  # MinIO — object storage (raw assets / outputs / export zips)
+  # -------------------------------------------------------------------------
+  minio:
+    image: minio/minio
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      # MinIO native health endpoints (no mc alias setup required)
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - avs_net
+    # console (operator-only) — uncomment when needed
+    # ports:
+    #   - "9001:9001"
+
+  # -------------------------------------------------------------------------
+  # Render — ffmpeg static composition worker (S7; queue wiring in W3/W4)
+  # -------------------------------------------------------------------------
+  render:
+    build:
+      context: render
+      dockerfile: Dockerfile
+    image: avs/render:stage0
+    restart: unless-stopped
+    environment:
+      PORT: 4001
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: "false"
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:4001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - avs_net
+
+  # -------------------------------------------------------------------------
+  # Nginx — single public entrypoint (HTTPS termination, R6)
+  # -------------------------------------------------------------------------
+  nginx:
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    image: avs/nginx:stage1
+    restart: unless-stopped
+    ports:
+      - "80:80"      # ACME challenge + HTTP→HTTPS redirect
+      - "443:443"    # TLS termination
+    volumes:
+      # Real TLS certs (Let's Encrypt) — created by scripts/issue-cert.sh.
+      # If none exist yet, run scripts/ensure-certs.sh first (generates a
+      # self-signed dev pair) so nginx can start in local/dev mode.
+      - ./certs:/etc/nginx/certs:ro
+      # ACME webroot shared with the certbot one-shot service (HTTP-01).
+      - ./certs/webroot:/var/www/certbot:rw
+      # app/ 新前端静态产物（Vite SPA, nginx / → index.html fallback）
+      - ./app/dist:/www/app:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      # TLS health over 443 (self-signed in dev → --no-check-certificate).
+      test: ["CMD", "wget", "-qO-", "--no-check-certificate", "https://127.0.0.1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - avs_net
+
+  # -------------------------------------------------------------------------
+  # Certbot — Let's Encrypt issuance (one-shot; NOT started by compose up).
+  #   Run: docker compose --profile certbot run --rm certbot certonly \
+  #          --webroot -w /var/www/certbot -d <DOMAIN> \
+  #          --email <EMAIL> --agree-tos --no-eff-email
+  #   or just use scripts/issue-cert.sh (copies certs + reloads nginx).
+  # -------------------------------------------------------------------------
+  certbot:
+    image: certbot/certbot:latest
+    profiles: ["certbot"]
+    restart: "no"
+    volumes:
+      - ./certs/live:/etc/letsencrypt/live
+      - ./certs/archive:/etc/letsencrypt/archive
+      - ./certs/renewal:/etc/letsencrypt/renewal
+      - ./certs/webroot:/var/www/certbot
+    networks:
+      - avs_net
+
+volumes:
+  pg_data:
+  redis_data:
+  minio_data:
+
+networks:
+  avs_net:
+    driver: bridge

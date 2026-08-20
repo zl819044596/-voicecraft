@@ -1,0 +1,50 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build output
+.next
+out
+dist
+**/dist
+*.tsbuildinfo
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Reference docs (build contexts don't need them)
+*.md
+
+# Other service source — only package manifests are needed for npm workspaces
+# (the api/render/web images each build from this root context).
+# api/ 需完整源码进构建上下文（api/Dockerfile 的 builder COPY api ./api 编译 TS，
+# runner 还需 db 迁移资产 + entrypoint.sh）。
+api/*
+!api/package.json
+!api/tsconfig.json
+!api/src
+!api/db
+!api/entrypoint.sh
+render/*
+!render/package.json
+render/worker/*
+!render/worker/package.json
+
+# Deployment material — must never enter app image build contexts
+certs
+scripts
+backups
+
+# Git / OS
+.git
+.gitignore
+.DS_Store
+
+# Docker / CI
+docker-compose.yml
+docker-compose.*.yml
+
+# Logs
+*.log

@@ -1,0 +1,15 @@
+{
+  "name": "ai-video-studio-render-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Render worker: consumes avs:render jobs, produces SRT + static/i2v composed MP4 (ffmpeg + libass)",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ioredis": "^5.4.2",
+    "minio": "^8.0.7"
+  }
+}

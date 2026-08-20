@@ -1,0 +1,37 @@
+{
+  "name": "@avs/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI Video Studio backend API (Express + TypeScript)",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node -e \"require('node:fs').cpSync('src/providers/mock-assets', 'dist/providers/mock-assets', { recursive: true })\"",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "migrate": "node db/migrate.js",
+    "seed": "node db/seed.js"
+  },
+  "dependencies": {
+    "@avs/shared": "*",
+    "archiver": "^7.0.1",
+    "cookie": "^1.0.2",
+    "express": "^4.21.2",
+    "ioredis": "^5.4.2",
+    "minio": "^8.0.3",
+    "nodemailer": "^6.9.16",
+    "pg": "^8.13.1",
+    "ws": "^8.21.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/cookie": "^0.6.0",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22",
+    "@types/nodemailer": "^6.4.17",
+    "@types/pg": "^8.11.10",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,2 @@
+# Placeholder — ACME webroot. Real challenge files are written here by the
+# certbot container at issuance time; nginx serves them from this directory.

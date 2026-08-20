@@ -1,0 +1,7 @@
+# Never commit private keys / Let's Encrypt material.
+*.pem
+live/
+archive/
+renewal/
+webroot/*
+!webroot/.gitkeep

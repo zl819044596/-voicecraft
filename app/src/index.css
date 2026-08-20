@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Design tokens (design.md §3.1) — dark-only console */
+    --bg-0: #08080D;
+    --bg-1: #0E0E15;
+    --bg-2: #15151F;
+    --bg-3: #1C1C29;
+    --line: #262635;
+    --line-strong: #34344A;
+    --text-1: #F2F2F8;
+    --text-2: #A9A9BD;
+    --text-3: #6E6E84;
+    --brand: #7C5CFF;
+    --brand-strong: #9A80FF;
+    --brand-soft: rgba(124, 92, 255, 0.14);
+    --byok: #2DD4BF;
+    --managed: #FBBF24;
+    --mode-static: #38BDF8;
+    --mode-i2v: #E879F9;
+    --ok: #34D399;
+    --err: #F87171;
+    --stale: #FB923C;
+    --dim: #8B8B9E;
+
+    /* shadcn variable mapping (dark console) */
+    --background: 240 24% 4%;
+    --foreground: 240 33% 96%;
+    --card: 240 24% 7%;
+    --card-foreground: 240 33% 96%;
+    --popover: 240 19% 10%;
+    --popover-foreground: 240 33% 96%;
+    --primary: 252 100% 68%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 19% 10%;
+    --secondary-foreground: 240 33% 96%;
+    --muted: 240 19% 10%;
+    --muted-foreground: 240 12% 58%;
+    --accent: 240 19% 12%;
+    --accent-foreground: 240 33% 96%;
+    --destructive: 0 91% 71%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 18% 18%;
+    --input: 240 18% 18%;
+    --ring: 252 100% 68%;
+    --radius: 0.625rem;
+    --sidebar-background: 240 24% 7%;
+    --sidebar-foreground: 240 33% 96%;
+    --sidebar-primary: 252 100% 68%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 19% 10%;
+    --sidebar-accent-foreground: 240 33% 96%;
+    --sidebar-border: 240 18% 18%;
+    --sidebar-ring: 252 100% 68%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    /* static background texture: two radial gradients + faint noise (design.md §3.1) */
+    background-image:
+      radial-gradient(900px 600px at 8% -10%, rgba(124, 92, 255, 0.06), transparent 60%),
+      radial-gradient(900px 700px at 105% 110%, rgba(45, 212, 191, 0.04), transparent 60%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: rgba(124, 92, 255, 0.35);
+  }
+  :focus-visible {
+    outline: 2px solid rgba(124, 92, 255, 0.5);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
+  }
+  /* 中文界面优先中文字体（PIPELINE_TASK_42 阶段 D：语言切换同步字体） */
+  html[lang='zh'] .font-display {
+    font-family: "Noto Sans SC", "Space Grotesk", sans-serif;
+  }
+  /* stale 45° diagonal stripe texture (design.md §3.1) */
+  .stale-stripes {
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgba(251, 146, 60, 0.25) 0 6px,
+      transparent 6px 12px
+    );
+  }
+  /* running-step shimmer sweep (design.md §4) */
+  .shimmer-sweep {
+    background-image: linear-gradient(
+      100deg,
+      transparent 30%,
+      rgba(124, 92, 255, 0.12) 50%,
+      transparent 70%
+    );
+    background-size: 200% 100%;
+  }
+}
