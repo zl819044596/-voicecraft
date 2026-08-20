@@ -5,7 +5,7 @@ ENV FFPROBE_BINARY=/usr/local/bin/ffprobe
 ENV PORT=4002
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends curl fonts-noto-cjk \
+  && apt-get install -y --no-install-recommends curl fonts-noto-cjk nodejs \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /srv/compose

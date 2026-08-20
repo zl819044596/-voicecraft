@@ -2,35 +2,43 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ─────────────────────────────────────────────────────────────
+   AI 工具站 · 设计令牌（浅色主题）
+   白底灰字 · 主色 #2563eb · 辅助色 #f0f5ff · 文字 #1e293b/#64748b
+   ───────────────────────────────────────────────────────────── */
 :root {
-  color-scheme: dark;
-  --app-bg: oklch(13% 0.014 265);
-  --app-bg-subtle: oklch(17% 0.016 265);
-  --app-bg-muted: oklch(21% 0.018 265);
-  --app-bg-elevated: oklch(17% 0.016 265);
-  --app-border: oklch(96% 0.006 262 / 0.12);
-  --app-border-strong: oklch(96% 0.006 262 / 0.2);
-  --app-text-primary: oklch(96% 0.006 262);
-  --app-text-secondary: oklch(72% 0.014 262);
-  --app-text-tertiary: oklch(55% 0.014 262);
-  --app-text-disabled: oklch(42% 0.012 262);
+  color-scheme: light;
+  --app-bg: #ffffff;
+  --app-bg-subtle: #f8fafc;
+  --app-bg-muted: #f1f5f9;
+  --app-bg-elevated: #ffffff;
+  --app-border: #e2e8f0;
+  --app-border-strong: #cbd5e1;
+  --app-text-primary: #1e293b;
+  --app-text-secondary: #64748b;
+  --app-text-tertiary: #94a3b8;
+  --app-text-disabled: #cbd5e1;
 
-  --app-brand: oklch(76% 0.17 50);
-  --app-brand-hover: oklch(80% 0.16 50);
-  --app-brand-active: oklch(70% 0.16 50);
-  --app-brand-subtle: oklch(76% 0.17 50 / 0.14);
+  --app-brand: #2563eb;
+  --app-brand-hover: #1d4ed8;
+  --app-brand-active: #1e40af;
+  --app-brand-subtle: #f0f5ff;
 
-  --app-success: oklch(70% 0.12 150);
-  --app-success-bg: oklch(70% 0.12 150 / 0.14);
-  --app-warning: oklch(76% 0.14 70);
-  --app-warning-bg: oklch(76% 0.14 70 / 0.14);
-  --app-error: oklch(65% 0.16 20);
-  --app-error-bg: oklch(65% 0.16 20 / 0.14);
-  --app-info: oklch(72% 0.08 250);
-  --app-info-bg: oklch(72% 0.08 250 / 0.14);
-  --app-stale: oklch(76% 0.14 70);
-  --app-stale-bg: oklch(76% 0.14 70 / 0.14);
-  --app-pending: oklch(55% 0.014 262);
+  --app-success: #16a34a;
+  --app-success-bg: #f0fdf4;
+  --app-warning: #d97706;
+  --app-warning-bg: #fffbeb;
+  --app-error: #dc2626;
+  --app-error-bg: #fef2f2;
+  --app-info: #2563eb;
+  --app-info-bg: #f0f5ff;
+  --app-stale: #d97706;
+  --app-stale-bg: #fffbeb;
+  --app-pending: #94a3b8;
+
+  /* 卡片轻阴影 */
+  --app-shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 14px -4px rgb(15 23 42 / 0.08);
+  --app-shadow-card-hover: 0 6px 24px -8px rgb(15 23 42 / 0.14);
 }
 
 .dark {
@@ -38,8 +46,9 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-sora), "Sora", system-ui, sans-serif;
-  --font-mono: var(--font-mono-jb), "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 
   --color-bg: var(--app-bg);
   --color-bg-subtle: var(--app-bg-subtle);
@@ -66,4 +75,7 @@
   --color-stale: var(--app-stale);
   --color-stale-bg: var(--app-stale-bg);
   --color-pending: var(--app-pending);
+
+  --shadow-card: var(--app-shadow-card);
+  --shadow-card-hover: var(--app-shadow-card-hover);
 }

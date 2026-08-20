@@ -52,21 +52,30 @@ export function TopBar() {
 
   return (
     <header className="top-bar">
-      <span className="page-title">{title}</span>
-      {meta ? <span className="top-meta">{meta}</span> : null}
+      <div className="top-title-wrap">
+        <span className="page-title">{title}</span>
+        {meta ? <span className="top-meta">{meta}</span> : null}
+      </div>
       <span className="spacer" />
-      <LocaleSwitcher />
-      {typeof remaining === "number" && typeof limit === "number" ? (
-        <span className="top-credits" title={t("station.app.quotaTip")}>
-          {t("station.app.quotaToday", { remaining, limit })}
+      <div className="top-actions">
+        <LocaleSwitcher />
+        {typeof remaining === "number" && typeof limit === "number" ? (
+          <span className="top-credits" title={t("station.app.quotaTip")}>
+            {t("station.app.quotaToday", { remaining, limit })}
+          </span>
+        ) : null}
+        <button
+          type="button"
+          className="top-logout"
+          onClick={() => void logout()}
+          title={t("station.app.logout")}
+        >
+          {t("station.app.logout")}
+        </button>
+        <span className="avatar" title={user?.email ?? ""}>
+          {initial}
         </span>
-      ) : null}
-      <button type="button" className="top-logout" onClick={() => void logout()} title={t("station.app.logout")}>
-        {t("station.app.logout")}
-      </button>
-      <span className="avatar" title={user?.email ?? ""}>
-        {initial}
-      </span>
+      </div>
     </header>
   );
 }

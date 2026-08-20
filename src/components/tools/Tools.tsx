@@ -944,13 +944,11 @@ function ToolLayout({
 }) {
   return (
     <div className="mx-auto max-w-2xl">
-      <p className="mb-2 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-[var(--app-brand)]">
-        tool
-      </p>
-      <h1 className="text-[clamp(1.75rem,3vw,2.25rem)] font-normal leading-tight tracking-[-0.03em] lowercase text-text-primary [font-family:var(--font-instrument),Georgia,serif]">
-        {title}
-      </h1>
-      <p className="mt-2 mb-6 text-[13.5px] leading-relaxed text-text-secondary">{desc}</p>
+      <header className="tool-header">
+        <span className="tool-tag">Tool</span>
+        <h1 className="tool-title">{title}</h1>
+        <p className="tool-desc">{desc}</p>
+      </header>
       <div className="space-y-3">{children}</div>
     </div>
   );
@@ -958,16 +956,53 @@ function ToolLayout({
 
 function ErrorBox({ msg }: { msg: string }) {
   return (
-    <div className="mt-3 rounded border border-error/30 bg-error-bg px-3 py-2 text-[12px] text-error">
-      {msg}
+    <div
+      className="mt-3 flex items-start gap-2 rounded border border-error/30 bg-error-bg px-3 py-2.5 text-[12.5px] leading-relaxed text-error"
+      role="alert"
+    >
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        className="mt-0.5 shrink-0"
+        aria-hidden
+      >
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v4M12 16h.01" />
+      </svg>
+      <span>{msg}</span>
     </div>
   );
 }
 
 function ResultBox({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card className="mt-4">
-      <CardHead title={title} />
+    <Card className="mt-4 shadow-card">
+      <CardHead
+        title={
+          <span className="inline-flex items-center gap-2">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-brand"
+              aria-hidden
+            >
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+            {title}
+          </span>
+        }
+      />
       {children}
     </Card>
   );

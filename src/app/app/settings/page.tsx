@@ -12,19 +12,13 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <div>
-        <p className="mb-2 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-[var(--app-brand)]">
-          {t("station.app.settingsKicker")}
-        </p>
-        <h1 className="text-[clamp(1.75rem,3vw,2.25rem)] font-normal leading-tight tracking-[-0.03em] text-text-primary [font-family:var(--font-instrument),Georgia,serif]">
-          {t("station.app.settingsTitle")}
-        </h1>
-        <p className="mt-2 text-[13.5px] leading-relaxed text-text-secondary">
-          {t("station.app.settingsLede")}
-        </p>
+      <div className="mb-6">
+        <span className="tool-tag">{t("station.app.settingsKicker")}</span>
+        <h1 className="tool-title">{t("station.app.settingsTitle")}</h1>
+        <p className="tool-desc">{t("station.app.settingsLede")}</p>
       </div>
 
-      <section className="rounded border border-border bg-bg-subtle p-4">
+      <section className="rounded border border-border bg-bg-subtle p-4 shadow-card">
         <h2 className="text-[13px] font-semibold text-text-primary">{t("station.app.settingsAccount")}</h2>
         <p className="mt-2 text-[13px] text-text-secondary">
           {user?.nickname || t("station.app.settingsDemoUser")}
@@ -33,7 +27,7 @@ export default function SettingsPage() {
         </p>
       </section>
 
-      <section className="rounded border border-border bg-bg-subtle p-4">
+      <section className="rounded border border-border bg-bg-subtle p-4 shadow-card">
         <h2 className="text-[13px] font-semibold text-text-primary">{t("station.app.settingsQuota")}</h2>
         {freeQuota ? (
           <p className="mt-2 text-[28px] font-mono tabular-nums text-text-primary">
@@ -61,7 +55,7 @@ export default function SettingsPage() {
         </ul>
       </section>
 
-      <section className="rounded border border-border border-dashed p-4">
+      <section className="rounded border border-border border-dashed p-4 shadow-card">
         <h2 className="text-[13px] font-semibold text-text-primary">{t("station.app.settingsBilling")}</h2>
         <p className="mt-2 text-[13px] text-text-secondary">{t("station.app.settingsBillingLede")}</p>
         <Link

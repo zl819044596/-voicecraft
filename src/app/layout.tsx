@@ -47,7 +47,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       lang="zh-CN"
       className={`${instrument.variable} ${sora.variable} ${mono.variable} h-full antialiased`}
     >
-      <body className="min-h-full" style={{ fontFamily: "var(--font-sora), system-ui, sans-serif" }}>
+      <body className="min-h-full" style={{ fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" }}>
         <SessionProvider>{children}</SessionProvider>
         <CookieBanner />
       </body>

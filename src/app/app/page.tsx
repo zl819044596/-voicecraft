@@ -38,18 +38,43 @@ export default function DashboardPage() {
         <p className="wb-lede">{t("station.app.homeLede")}</p>
         <Link className="wb-primary" href={`/app/tools/${PRIMARY_TOOL_SLUG}`}>
           {t("station.app.homeCta")}
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
         </Link>
       </header>
 
-      <section className="wb-primary-card">
-        <span className="wb-idx">01</span>
-        <div>
-          <Link href={`/app/tools/${PRIMARY_TOOL.slug}`} className="wb-tool-name">
-            {name(PRIMARY_TOOL.slug, PRIMARY_TOOL.name)}
-          </Link>
+      <Link href={`/app/tools/${PRIMARY_TOOL.slug}`} className="wb-primary-card">
+        <span className="wb-icon">{PRIMARY_TOOL.icon}</span>
+        <span className="min-w-0 flex-1">
+          <span className="wb-tool-name">{name(PRIMARY_TOOL.slug, PRIMARY_TOOL.name)}</span>
           <p className="wb-tool-desc">{desc(PRIMARY_TOOL.slug, PRIMARY_TOOL.desc)}</p>
-        </div>
-      </section>
+        </span>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="self-center shrink-0 text-text-tertiary"
+          aria-hidden
+        >
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </Link>
 
       <aside className="wb-aside">
         <strong>{t("station.app.homeSteps")}</strong>
@@ -64,9 +89,9 @@ export default function DashboardPage() {
         <p className="wb-kicker">{t("station.app.homeMore")}</p>
         <p className="wb-secondary-note">{t("station.app.homeMoreNote")}</p>
         <div className="wb-grid wb-grid--secondary">
-          {SECONDARY_TOOLS.map((tool, i) => (
+          {SECONDARY_TOOLS.map((tool) => (
             <Link key={tool.slug} href={`/app/tools/${tool.slug}`} className="wb-tool">
-              <span className="wb-idx">{String(i + 2).padStart(2, "0")}</span>
+              <span className="wb-idx">{tool.icon}</span>
               <span className="wb-tool-name">{name(tool.slug, tool.name)}</span>
               <span className="wb-tool-desc">{desc(tool.slug, tool.desc)}</span>
             </Link>
