@@ -18,17 +18,16 @@ export default function ToolPage({ params }: { params: Promise<{ slug: string }>
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Link href="/app/tools" className="back-link group">
+      <Link href="/app/tools" className="back-link">
         <svg
           width="14"
           height="14"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="transition-transform group-hover:-translate-x-0.5"
           aria-hidden
         >
           <path d="M19 12H5M11 18l-6-6 6-6" />

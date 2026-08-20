@@ -210,7 +210,7 @@ export function Sidebar() {
           {t("station.app.sideQuota")}
         </Link>
 
-        <div style={{ marginTop: "auto", padding: "16px 12px 10px", borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
+        <div className="side-footer">
           <LocaleSwitcher />
         </div>
       </aside>

@@ -4,41 +4,42 @@
 
 /* ─────────────────────────────────────────────────────────────
    AI 工具站 · 设计令牌（浅色主题）
-   灰底白卡 · 主色 #3b82f6 · 辅助色 #eff6ff · 文字 #18181b/#52525b
+   白底 + 细边框 · 主色 #2563eb 点缀使用 · 卡片无阴影
+   参考 storyboard-video.com 的干净简洁风格
    ───────────────────────────────────────────────────────────── */
 :root {
   color-scheme: light;
   --app-bg: #ffffff;
   --app-bg-subtle: #ffffff;
-  --app-bg-muted: #f4f4f5;
+  --app-bg-muted: #f5f6f8;
   --app-bg-elevated: #ffffff;
-  --app-border: #e4e4e7;
-  --app-border-strong: #d4d4d8;
-  --app-text-primary: #18181b;
-  --app-text-secondary: #52525b;
-  --app-text-tertiary: #a1a1aa;
-  --app-text-disabled: #d4d4d8;
+  --app-border: #e5e7eb;
+  --app-border-strong: #d4d7dd;
+  --app-text-primary: #111827;
+  --app-text-secondary: #4b5563;
+  --app-text-tertiary: #9aa1ab;
+  --app-text-disabled: #d1d5db;
 
-  --app-brand: #3b82f6;
-  --app-brand-hover: #2563eb;
-  --app-brand-active: #1d4ed8;
+  --app-brand: #2563eb;
+  --app-brand-hover: #1d4ed8;
+  --app-brand-active: #1e40af;
   --app-brand-subtle: #eff6ff;
 
   --app-success: #16a34a;
   --app-success-bg: #f0fdf4;
-  --app-warning: #d97706;
+  --app-warning: #b45309;
   --app-warning-bg: #fffbeb;
   --app-error: #dc2626;
   --app-error-bg: #fef2f2;
-  --app-info: #3b82f6;
+  --app-info: #2563eb;
   --app-info-bg: #eff6ff;
-  --app-stale: #d97706;
+  --app-stale: #b45309;
   --app-stale-bg: #fffbeb;
-  --app-pending: #a1a1aa;
+  --app-pending: #9ca3af;
 
-  /* 卡片轻阴影 */
-  --app-shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 1px 3px rgb(0 0 0 / 0.06);
-  --app-shadow-card-hover: 0 6px 20px -6px rgb(0 0 0 / 0.12);
+  /* 卡片一律用细边框，不用阴影 */
+  --app-shadow-card: none;
+  --app-shadow-card-hover: none;
 }
 
 .dark {

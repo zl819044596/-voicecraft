@@ -933,6 +933,86 @@ export function MakeVideoTool() {
 }
 
 /* ── 共享 UI ── */
+
+/** 工具图标（线性 SVG，与侧边栏图标风格一致，替代 emoji） */
+const TOOL_ICON_BY_SLUG: Record<string, string> = {
+  "script-to-video": "film",
+  "storyboard-generator": "storyboard",
+  "ai-video-script-writer": "script",
+  "ai-voiceover": "voice",
+  "subtitle-generator": "subtitles",
+  "image-generator": "image",
+};
+
+export function ToolIcon({
+  slug,
+  size = 19,
+  className = "",
+}: {
+  slug: string;
+  size?: number;
+  className?: string;
+}) {
+  const name = TOOL_ICON_BY_SLUG[slug] ?? "script";
+  const common = {
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.7,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    viewBox: "0 0 24 24",
+    width: size,
+    height: size,
+    className,
+    "aria-hidden": true,
+  };
+  switch (name) {
+    case "film":
+      return (
+        <svg {...common}>
+          <rect x="3" y="4" width="18" height="16" rx="2.5" />
+          <path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4" />
+        </svg>
+      );
+    case "storyboard":
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="18" height="14" rx="2" />
+          <path d="M8 21h8M12 17v4M7 7h2M11 7h2M15 7h2M7 11h2M11 11h2M15 11h2" />
+        </svg>
+      );
+    case "voice":
+      return (
+        <svg {...common}>
+          <rect x="9" y="2.5" width="6" height="11" rx="3" />
+          <path d="M5 11a7 7 0 0 0 14 0M12 18v3.5" />
+        </svg>
+      );
+    case "subtitles":
+      return (
+        <svg {...common}>
+          <rect x="3" y="5" width="18" height="14" rx="2.5" />
+          <path d="M7 11h10M7 15h6" />
+        </svg>
+      );
+    case "image":
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="18" height="18" rx="2.5" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <path d="m21 15-5-5L5 21" />
+        </svg>
+      );
+    default:
+      return (
+        <svg {...common}>
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
+      );
+  }
+}
+
 function ToolLayout({
   title,
   desc,
@@ -981,7 +1061,7 @@ function ErrorBox({ msg }: { msg: string }) {
 
 function ResultBox({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card className="mt-4 shadow-card">
+    <Card className="mt-4">
       <CardHead
         title={
           <span className="inline-flex items-center gap-2">
