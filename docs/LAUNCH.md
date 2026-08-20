@@ -16,6 +16,8 @@
 
 默认 **`AUTH_MODE=fake`**：`/login` 点「演示登录」即可进工作台，不需 Google。
 
+生产环境需额外设置 **`ALLOW_FAKE_AUTH=1`**，否则演示登录返回 403（防刷额度）。本地开发不受影响。
+
 上线接真登录时：
 
 1. 配好 `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`

@@ -16,12 +16,12 @@ function composeHeaders(): HeadersInit {
 function humanComposeError(raw: string): string {
   const s = raw.toLowerCase();
   if (s.includes("econnrefused") || s.includes("fetch failed") || s.includes("aborted")) {
-    return "合成服务未启动或连不上。请先运行 docker compose -f docker-compose.dev.yml up -d compose";
+    return "Compose service unreachable. Download the asset pack, or start: docker compose -f docker-compose.dev.yml up -d compose";
   }
   if (s.includes("unauthorized") || s.includes("401")) {
-    return "合成服务鉴权失败，请检查 COMPOSE_SERVICE_SECRET 是否与 Next 一致";
+    return "Compose auth failed — check COMPOSE_SERVICE_SECRET";
   }
-  return raw.slice(0, 280) || "合成失败";
+  return raw.slice(0, 280) || "Compose failed";
 }
 
 export async function POST(req: Request) {

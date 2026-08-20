@@ -5,7 +5,8 @@ import { Btn, Card, CardHead, Field, Input, Textarea, Select } from "@/component
 import type { Shot } from "@/lib/siliconflow";
 import { VOICE_OPTIONS } from "@/lib/tools-config";
 import { downloadStoryboardPack } from "@/lib/export-pack";
-import { useTranslation } from "@/i18n";
+import { useTranslation, resolveLocale, type TFunc } from "@/i18n";
+import { translate } from "@/i18n/core";
 
 type EditableShot = Shot & { retries?: number; audioB64?: string };
 
@@ -16,12 +17,13 @@ function notifyQuota() {
 }
 
 function friendlyApiError(status: number, msg: string): string {
-  if (status === 401) return "请先登录后再使用";
-  if (status === 402) return msg || "今日免费额度不足，请明日再试或查看「额度与退出」";
+  const loc = resolveLocale();
+  if (status === 401) return translate("station.make.errLogin", loc);
+  if (status === 402) return msg || translate("station.make.errQuota", loc);
   if (status === 502 || /合成服务|compose|econnrefused/i.test(msg)) {
-    return msg.includes("合成")
+    return /合成|compose|asset pack|素材包/i.test(msg)
       ? msg
-      : "合成服务暂时不可用。请确认 compose 容器已启动。";
+      : translate("station.make.errCompose", loc);
   }
   return msg;
 }
@@ -47,19 +49,6 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   }
   notifyQuota();
   return data as T;
-}
-
-async function urlToBase64(url: string): Promise<string> {
-  if (url.startsWith("data:")) {
-    const i = url.indexOf(",");
-    return i >= 0 ? url.slice(i + 1) : url;
-  }
-  const res = await fetch(url);
-  const buf = await res.arrayBuffer();
-  const bytes = new Uint8Array(buf);
-  let binary = "";
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!);
-  return btoa(binary);
 }
 
 function fileToDataUrl(file: File): Promise<string> {
@@ -166,6 +155,7 @@ export function ScriptWriterTool() {
 
 /* ── 分镜生成（可编辑 / 重试 / 上传 / Pexels） ── */
 export function StoryboardTool() {
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   const [aspect, setAspect] = useState("9:16");
   const [shots, setShots] = useState<EditableShot[]>([]);
@@ -267,6 +257,7 @@ export function StoryboardTool() {
               onRegen={() => regenImage(i)}
               onPexels={() => pexelsFallback(i)}
               onUpload={(file) => uploadImage(i, file)}
+              t={t}
             />
           ))}
         </div>
@@ -283,6 +274,7 @@ function ShotEditor({
   onRegen,
   onPexels,
   onUpload,
+  t,
 }: {
   index: number;
   shot: EditableShot;
@@ -291,23 +283,38 @@ function ShotEditor({
   onRegen: () => void;
   onPexels: () => void;
   onUpload: (file: File) => void;
+  t: TFunc;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const missing = !shot.imageUrl;
 
   return (
     <Card>
       <CardHead
-        title={`镜头 ${index + 1}`}
+        title={
+          <span className="inline-flex items-center gap-2">
+            {t("station.make.shotN", { n: index + 1 })}
+            {missing ? (
+              <span className="rounded bg-error-bg px-1.5 py-0.5 text-[10px] font-medium text-error">
+                {t("station.make.missingFrame")}
+              </span>
+            ) : null}
+          </span>
+        }
         right={
           <div className="flex flex-wrap gap-1.5">
             <Btn size="sm" onClick={onRegen} disabled={busy}>
-              {busy ? "处理中…" : shot.imageUrl ? "重试生图" : "生成图片"}
+              {busy
+                ? t("station.make.processing")
+                : shot.imageUrl
+                  ? t("station.make.retryImg")
+                  : t("station.make.genImg")}
             </Btn>
             <Btn size="sm" onClick={onPexels} disabled={busy}>
-              素材兜底
+              {t("station.make.stock")}
             </Btn>
             <Btn size="sm" onClick={() => fileRef.current?.click()} disabled={busy}>
-              上传
+              {t("station.make.upload")}
             </Btn>
             <input
               ref={fileRef}
@@ -324,16 +331,16 @@ function ShotEditor({
         }
       />
       <div className="space-y-2">
-        <Field label="标题">
+        <Field label={t("station.make.fieldTitle")}>
           <Input value={shot.title} onChange={(e) => onChange({ title: e.target.value })} />
         </Field>
-        <Field label="旁白">
+        <Field label={t("station.make.fieldNarration")}>
           <Textarea rows={2} value={shot.content} onChange={(e) => onChange({ content: e.target.value })} />
         </Field>
-        <Field label="字幕">
+        <Field label={t("station.make.fieldCaption")}>
           <Input value={shot.subtitle} onChange={(e) => onChange({ subtitle: e.target.value })} />
         </Field>
-        <Field label="生图提示词">
+        <Field label={t("station.make.fieldPrompt")}>
           <Textarea
             rows={2}
             value={shot.imagePrompt}
@@ -515,7 +522,7 @@ type SourceMode = "direct" | "rewrite" | "create";
 type Stage = "input" | "review" | "done";
 
 export function MakeVideoTool() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [mode, setMode] = useState<SourceMode>("direct");
   const [text, setText] = useState("");
   const [topic, setTopic] = useState("");
@@ -528,6 +535,7 @@ export function MakeVideoTool() {
   const [loading, setLoading] = useState(false);
   const [busyIdx, setBusyIdx] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const [composeOk, setComposeOk] = useState<boolean | null>(null);
   const videoUrlRef = useRef("");
 
   useEffect(() => {
@@ -535,6 +543,21 @@ export function MakeVideoTool() {
       if (videoUrlRef.current.startsWith("blob:")) {
         URL.revokeObjectURL(videoUrlRef.current);
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/compose")
+      .then((r) => r.json())
+      .then((d: { ok?: boolean }) => {
+        if (!cancelled) setComposeOk(Boolean(d.ok));
+      })
+      .catch(() => {
+        if (!cancelled) setComposeOk(false);
+      });
+    return () => {
+      cancelled = true;
     };
   }, []);
 
@@ -546,6 +569,8 @@ export function MakeVideoTool() {
     setVideoUrl(url);
   };
 
+  const scriptTone = locale === "en" ? "professional, friendly" : "专业、亲切";
+
   const prepareScript = async (): Promise<string> => {
     if (mode === "direct") {
       if (!text.trim()) throw new Error(t("station.make.phScript"));
@@ -556,16 +581,18 @@ export function MakeVideoTool() {
       setStep(t("station.make.stepScript"));
       const data = await postJson<{ script: string }>("/api/ai/script", {
         topic,
-        tone: "专业、亲切",
+        tone: scriptTone,
       });
       return data.script;
     }
-    // rewrite：用文案做二创脚本
     if (!text.trim()) throw new Error(t("station.make.phRef"));
     setStep(t("station.make.stepRewrite"));
     const data = await postJson<{ script: string }>("/api/ai/script", {
-      topic: `基于以下素材改写成短视频旁白脚本：\n${text}`,
-      tone: "专业、亲切",
+      topic:
+        locale === "en"
+          ? `Rewrite the following into short-video narration:\n${text}`
+          : `基于以下素材改写成短视频旁白脚本：\n${text}`,
+      tone: scriptTone,
     });
     return data.script;
   };
@@ -676,6 +703,7 @@ export function MakeVideoTool() {
         aspect,
         voice,
         script: text,
+        locale,
         onProgress: setStep,
       });
       setStep("");
@@ -692,35 +720,30 @@ export function MakeVideoTool() {
     setError("");
     try {
       const ready = await ensureShotAssets(shots);
-      const composeShots: Array<{ image: string; audio: string; subtitle: string }> = [];
-      for (let i = 0; i < ready.length; i++) {
-        const shot = ready[i]!;
-        setStep(t("station.make.stepAssets", { i: i + 1, n: ready.length }));
-        const imgB64 = await urlToBase64(shot.imageUrl!);
-        composeShots.push({
-          image: imgB64,
-          audio: shot.audioB64!,
-          subtitle: shot.subtitle || shot.content,
-        });
-      }
+      // 外链 / data URL 交给 compose 服务端拉取，避免浏览器 CORS 与超大 JSON
+      const composeShots = ready.map((shot) => ({
+        image: shot.imageUrl!,
+        audio: shot.audioB64!,
+        subtitle: shot.subtitle || shot.content,
+      }));
       setStep(t("station.make.stepFfmpeg"));
       const res = await fetch("/api/compose", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
         credentials: "include",
-        body: JSON.stringify({ shots: composeShots }),
+        body: JSON.stringify({ shots: composeShots, aspect }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         const err = data?.error;
         const raw =
-          typeof err === "string" ? err : err?.message || `合成失败 (${res.status})`;
+          typeof err === "string" ? err : err?.message || `compose failed (${res.status})`;
         throw new Error(friendlyApiError(res.status, raw));
       }
       const ctype = res.headers.get("content-type") || "";
       if (ctype.includes("application/json")) {
         const data = (await res.json()) as { video?: string };
-        if (!data.video) throw new Error("合成结果为空");
+        if (!data.video) throw new Error(t("station.make.errCompose"));
         setBlobVideo(`data:video/mp4;base64,${data.video}`);
       } else {
         const blob = await res.blob();
@@ -739,6 +762,12 @@ export function MakeVideoTool() {
 
   return (
     <ToolLayout title={t("station.make.title")} desc={t("station.make.desc")}>
+      {composeOk === false ? (
+        <div className="rounded border border-border bg-bg-subtle px-3 py-2 text-[12px] text-text-secondary">
+          <strong className="text-text-primary">{t("station.make.composeDown")}</strong>
+          <div className="mt-1">{t("station.make.composeDownHint")}</div>
+        </div>
+      ) : null}
       {stage === "input" && (
         <>
           <div className="flex flex-wrap gap-1.5">
@@ -841,6 +870,7 @@ export function MakeVideoTool() {
                     setError(e instanceof Error ? e.message : String(e));
                   }
                 }}
+                t={t}
               />
             ))}
           </div>
@@ -894,9 +924,9 @@ export function MakeVideoTool() {
         </ResultBox>
       )}
 
-      {loading && step && stage === "input" && (
+      {loading && step ? (
         <p className="text-[12px] text-text-secondary">{step}</p>
-      )}
+      ) : null}
       {error && <ErrorBox msg={error} />}
     </ToolLayout>
   );
